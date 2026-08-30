@@ -1,0 +1,225 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:商业超体价值与定位.Converters">
+
+    <!-- 转换器 -->
+    <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    <converters:InverseBooleanConverter x:Key="InverseBoolConverter"/>
+    <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+    <converters:StringToColorBrushConverter x:Key="ColorToBrushConverter"/>
+    <converters:LinesToHeightConverter x:Key="LinesToHeightConverter"/>
+    <converters:CountToVisibilityConverter x:Key="CountToVisConverter"/>
+    <converters:StringToVisibilityConverter x:Key="StringToVisConverter"/>
+
+    <!-- Menu样式 -->
+    <Style TargetType="Menu">
+        <Setter Property="Background" Value="#1A1A2E"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <!-- MenuItem样式 -->
+    <Style TargetType="MenuItem">
+        <Setter Property="Background" Value="#252A40"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="Icon"
+                                              Grid.Column="0"
+                                              ContentSource="Icon"
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,8,0"/>
+                            <ContentPresenter Grid.Column="1"
+                                              ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              VerticalAlignment="Center"/>
+                            <TextBlock x:Name="InputGestureText"
+                                       Grid.Column="2"
+                                       Text="{TemplateBinding InputGestureText}"
+                                       Foreground="Gray"
+                                       Margin="20,0,0,0"
+                                       VerticalAlignment="Center"/>
+                            <Path x:Name="SubMenuArrow"
+                                  Grid.Column="3"
+                                  Data="M0,0 L4,4 L0,8"
+                                  Fill="White"
+                                  Margin="10,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Visibility="Collapsed"/>
+                            <Popup x:Name="SubMenuPopup"
+                                   IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Fade">
+                                <Border Background="#252A40"
+                                        BorderBrush="#3A3F5C"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Margin="0,2,0,0">
+                                    <StackPanel IsItemsHost="True"/>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter TargetName="SubMenuArrow" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="SubMenuArrow" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="#3A3F5C"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="Gray"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 基础气泡样式 -->
+    <Style x:Key="BaseBubbleStyle" TargetType="Border">
+        <Setter Property="Background" Value="#252A40"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="15"/>
+    </Style>
+
+    <!-- 主按钮样式 -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#E94560" Offset="0"/>
+                    <GradientStop Color="#0F3460" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="20,12"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 次要按钮样式 -->
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="#252A40"/>
+        <Setter Property="Foreground" Value="#A0A0A0"/>
+        <Setter Property="BorderBrush" Value="#3A3F5C"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#2A2F4A"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#1A1F3A"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 滚动条样式 -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Width" Value="8"/>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="Height" Value="8"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 文本框样式 -->
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="#252A40"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="CaretBrush" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10"/>
+    </Style>
+
+    <!-- 进度条样式 -->
+    <Style TargetType="ProgressBar">
+        <Setter Property="Background" Value="#252A40"/>
+        <Setter Property="Foreground" Value="#4CAF50"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                        <Border x:Name="PART_Track">
+                            <Border x:Name="PART_Indicator"
+                                    Background="{TemplateBinding Foreground}"
+                                    CornerRadius="4"
+                                    HorizontalAlignment="Left"/>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

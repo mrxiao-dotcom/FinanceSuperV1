@@ -1,0 +1,32 @@
+## Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.cache
+*.swp
+
+## Logs
+logs/
+*.log
+
+## Sensitive config (API keys)
+**/appsettings*.json
+**/config*.json
+**/api*.json
+**/*apikey*.json
+**/settings.local.json
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## IDE
+.idea/
+*.iml
+
+## Other
+*.tmp
+*.bak

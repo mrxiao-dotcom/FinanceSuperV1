@@ -1,0 +1,197 @@
+<Window x:Class="商业超体价值与定位.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="大模型API配置"
+        Height="650" Width="580"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#1A1A2E">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <StackPanel>
+            <!-- 标题 -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="大模型API配置"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="White"/>
+                <TextBlock Text="配置您的AI大模型密钥，支持DeepSeek和Kimi双模型"
+                           FontSize="12"
+                           Foreground="#A0A0A0"
+                           Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <!-- 说明 -->
+            <Border Background="#252A40" CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="使用说明" Foreground="#4CAF50" FontSize="14" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <TextBlock Foreground="#D0D0D0" TextWrapping="Wrap" FontSize="12" LineHeight="20">
+                        <Run Text="• DeepSeek：用于常规内容生成，响应速度快"/>
+                        <LineBreak/>
+                        <Run Text="• Kimi：用于长上下文对话，支持超长输入"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- DeepSeek配置 -->
+            <Border Background="#16213E" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Ellipse Width="12" Height="12" Fill="#E94560" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="DeepSeek 配置（常规对话）" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+
+                    <TextBlock Text="API密钥" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="DeepSeekApiKeyBox"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <TextBlock Text="API地址" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBox x:Name="DeepSeekBaseUrlBox"
+                             Text="https://api.deepseek.com/v1"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <TextBlock Text="模型名称" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBox x:Name="DeepSeekModelBox"
+                             Text="deepseek-chat"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Temperature" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBox x:Name="DeepSeekTemperatureBox"
+                                     Text="0.7"
+                                     Background="#252A40"
+                                     Foreground="White"
+                                     BorderBrush="#3A3F5C"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <TextBlock Text="最大Token数" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBox x:Name="DeepSeekMaxTokensBox"
+                                     Text="2000"
+                                     Background="#252A40"
+                                     Foreground="White"
+                                     BorderBrush="#3A3F5C"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="13"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Kimi配置 -->
+            <Border Background="#16213E" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <Ellipse Width="12" Height="12" Fill="#9C27B0" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Kimi 配置（长上下文）" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+
+                    <TextBlock Text="API密钥" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="KimiApiKeyBox"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <TextBlock Text="API地址" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBox x:Name="KimiBaseUrlBox"
+                             Text="https://api.moonshot.cn/v1"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <TextBlock Text="模型名称" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBox x:Name="KimiModelBox"
+                             Text="moonshot-v1-8k"
+                             Margin="0,0,0,15"
+                             Background="#252A40"
+                             Foreground="White"
+                             BorderBrush="#3A3F5C"
+                             BorderThickness="1"
+                             Padding="10,8"
+                             FontSize="13"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Temperature" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBox x:Name="KimiTemperatureBox"
+                                     Text="0.7"
+                                     Background="#252A40"
+                                     Foreground="White"
+                                     BorderBrush="#3A3F5C"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <TextBlock Text="最大Token数" Foreground="#A0A0A0" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBox x:Name="KimiMaxTokensBox"
+                                     Text="8000"
+                                     Background="#252A40"
+                                     Foreground="White"
+                                     BorderBrush="#3A3F5C"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="13"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 按钮 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,10">
+                <Button Content="取消"
+                        Click="CancelButton_Click"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Width="100"
+                        Margin="0,0,10,0"/>
+                <Button Content="保存配置"
+                        Click="SaveButton_Click"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Width="120"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

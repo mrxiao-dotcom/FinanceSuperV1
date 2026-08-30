@@ -1,0 +1,308 @@
+<UserControl x:Class="商业超体价值与定位.Views.ChatPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:商业超体价值与定位.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:ChatViewModel}"
+             Background="#1A1A2E">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部标题栏 -->
+        <Border Grid.Row="0"
+                Background="#16213E"
+                Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="AI"
+                               FontSize="24"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"
+                               Foreground="#E94560"/>
+                    <StackPanel>
+                        <TextBlock Text="AI战略顾问"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                        <TextBlock Text="Copilot 伴随式诊断对话"
+                                   FontSize="12"
+                                   Foreground="#A0A0A0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 字体大小控制 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,15,0" VerticalAlignment="Center">
+                    <Button Content="A-"
+                            Command="{Binding DecreaseFontSizeCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Width="36" Height="32"
+                            FontSize="12"
+                            Padding="0"
+                            ToolTip="减小字体"/>
+                    <TextBlock Text="{Binding MessageFontSize, StringFormat={}{0}px}"
+                               Foreground="#A0A0A0"
+                               VerticalAlignment="Center"
+                               Margin="8,0"
+                               FontSize="12"
+                               Width="35"
+                               TextAlignment="Center"/>
+                    <Button Content="A+"
+                            Command="{Binding IncreaseFontSizeCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Width="36" Height="32"
+                            FontSize="14"
+                            Padding="0"
+                            ToolTip="增大字体"/>
+                </StackPanel>
+
+                <Button Grid.Column="2"
+                        Content="新会话"
+                        Command="{Binding DataContext.StartNewSessionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource SecondaryButtonStyle}"/>
+            </Grid>
+        </Border>
+
+        <!-- 复制成功提示 (浮动在最上层) -->
+        <Border Grid.Row="1"
+                Background="#4CAF50"
+                CornerRadius="8"
+                Padding="15,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,20,0,0"
+                Visibility="{Binding CopyNotificationVisible, Converter={StaticResource BoolToVisConverter}}"
+                Panel.ZIndex="100">
+            <TextBlock Text="{Binding CopyNotificationText}"
+                       Foreground="White"
+                       FontSize="13"
+                       FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- 对话消息区域 -->
+        <ScrollViewer Grid.Row="1"
+                      x:Name="MessagesScrollViewer"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="20,10">
+            <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,10"
+                                Padding="15"
+                                CornerRadius="12">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#252A40"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    <Setter Property="MaxWidth" Value="500"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                            <Setter Property="Background" Value="#0F3460"/>
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 角色标签 -->
+                                <TextBlock Grid.Row="0"
+                                           FontSize="11"
+                                           Foreground="#A0A0A0"
+                                           Margin="0,0,0,5">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="AI 商业超体"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                                    <Setter Property="Text" Value="您"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- 消息内容 -->
+                                <TextBox Grid.Row="1"
+                                         Text="{Binding Content, Mode=OneWay}"
+                                         Foreground="White"
+                                         TextWrapping="Wrap"
+                                         FontSize="{Binding DataContext.MessageFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         IsReadOnly="True"
+                                         Cursor="Arrow"
+                                         SelectionBrush="#4A4A6A"/>
+
+                                <!-- 操作栏 -->
+                                <Grid Grid.Row="2" Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 加载指示器 -->
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}}"
+                                                VerticalAlignment="Center">
+                                        <Ellipse Width="8" Height="8" Fill="#4CAF50" Margin="0,0,4,0">
+                                            <Ellipse.Triggers>
+                                                <EventTrigger RoutedEvent="Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard RepeatBehavior="Forever">
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetProperty="Opacity"
+                                                                From="1" To="0.3" Duration="0:0:0.5"
+                                                                AutoReverse="True"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </Ellipse.Triggers>
+                                        </Ellipse>
+                                        <TextBlock Text="正在思考..."
+                                                   Foreground="#A0A0A0"
+                                                   FontSize="12"/>
+                                    </StackPanel>
+
+                                    <!-- 时间戳 -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"
+                                               Foreground="#606060"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisConverter}}"/>
+
+                                    <!-- 复制按钮 -->
+                                    <Button Grid.Column="1"
+                                            Command="{Binding DataContext.CopyMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Content}"
+                                            ToolTip="复制文本"
+                                            Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisConverter}}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="5,2"
+                                            Cursor="Hand">
+                                        <TextBlock Text="📋" FontSize="14"/>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- 输入区域 -->
+        <Border Grid.Row="2"
+                Background="#16213E"
+                Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 输入框 -->
+                <Border Grid.Row="0"
+                        Background="#252A40"
+                        CornerRadius="8"
+                        Padding="15,10"
+                        Margin="0,0,0,10">
+                    <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="White"
+                             FontSize="14"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             MinHeight="{Binding DataContext.InputMinLines, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource LinesToHeightConverter}}"
+                             MaxHeight="200"
+                             x:Name="InputTextBox">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                </Border>
+
+                <!-- 控制按钮行 -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 输入框高度控制 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="输入框:"
+                                   Foreground="#808080"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+                        <Button Content="-"
+                                Command="{Binding DecreaseInputHeightCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Width="28" Height="28"
+                                FontSize="16"
+                                Padding="0"
+                                ToolTip="减小输入框高度"/>
+                        <TextBlock Text="{Binding InputMinLines, StringFormat={}{0}行}"
+                                   Foreground="#808080"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0"
+                                   Width="35"
+                                   TextAlignment="Center"/>
+                        <Button Content="+"
+                                Command="{Binding IncreaseInputHeightCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Width="28" Height="28"
+                                FontSize="16"
+                                Padding="0"
+                                ToolTip="增大输入框高度"/>
+                    </StackPanel>
+
+                    <!-- 提示 -->
+                    <TextBlock Grid.Column="1"
+                               Text="Enter 发送，Ctrl+Enter 换行"
+                               Foreground="#606060"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- 发送按钮 -->
+                    <Button Grid.Column="2"
+                            Command="{Binding SendMessageCommand}"
+                            Width="50" Height="36"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                            ToolTip="发送消息 (Ctrl+Enter)">
+                        <TextBlock Text="发送"
+                                   FontSize="12"
+                                   Foreground="White"/>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
