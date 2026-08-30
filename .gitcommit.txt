@@ -1,6 +1,0 @@
-feat: add dedicated MD export button
-
-- BlueprintExportWindow: new "Export MD" button next to PDF button
-- MD export saves directly to user's Documents folder, no dialog needed
-- Opens folder to locate the file after export
-- README updated to reflect three export formats
