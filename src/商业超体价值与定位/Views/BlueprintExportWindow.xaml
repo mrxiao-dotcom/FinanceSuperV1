@@ -220,7 +220,12 @@
                     Style="{StaticResource SecondaryButtonStyle}"
                     Width="100"
                     Margin="0,0,10,0"/>
-            <Button Content="💾 导出"
+            <Button Content="📄 导出 MD"
+                    Click="ExportMdButton_Click"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Width="130"
+                    Margin="0,0,10,0"/>
+            <Button Content="💾 导出 PDF"
                     Click="ExportButton_Click"
                     Style="{StaticResource PrimaryButtonStyle}"
                     Width="150"/>

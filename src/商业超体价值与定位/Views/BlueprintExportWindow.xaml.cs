@@ -124,6 +124,35 @@ public partial class BlueprintExportWindow : Window
         }
     }
 
+    private async void ExportMdButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var fileName = $"商业蓝图_{DateTime.Now:yyyyMMdd_HHmmss}.md";
+            var filePath = System.IO.Path.Combine(documentsPath, fileName);
+
+            var markdown = await _exportService.GenerateMarkdownAsync(_blueprint);
+            await System.IO.File.WriteAllTextAsync(filePath, markdown, System.Text.Encoding.UTF8);
+
+            MessageBox.Show(
+                $"Markdown 文件已导出至：\n{filePath}",
+                "导出成功",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"导出失败：{ex.Message}",
+                "导出错误",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
