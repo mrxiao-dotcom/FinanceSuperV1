@@ -243,14 +243,13 @@
             </Grid>
         </Border>
 
-        <!-- 生成中状态条 -->
+        <!-- 状态条（始终可见，随时反馈当前状态） -->
         <Border Grid.Row="1"
                 Background="#1F2535"
-                Padding="16,8"
-                Visibility="{Binding IsGeneratingOutline, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                Padding="16,8">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="⏳" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock Text="{Binding StatusMessage, FallbackValue='正在生成...，请稍候'}"
+                <TextBlock Text="{Binding StatusMessage, FallbackValue='准备就绪'}"
                            Foreground="#E0E0E0"
                            FontSize="13"
                            VerticalAlignment="Center"/>

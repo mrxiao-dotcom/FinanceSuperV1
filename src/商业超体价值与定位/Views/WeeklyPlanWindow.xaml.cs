@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using 商业超体价值与定位.ViewModels;
@@ -34,13 +35,30 @@ public partial class WeeklyPlanWindow : Window
         try
         {
             await _viewModel.InitializeAsync();
-            Log.Information("[WeeklyPlanWindow] 初始化完成");
+            Log.Information("[WeeklyPlanWindow] 初始化完成，HasPlan={HasPlan}, StatusMessage={Status}",
+                _viewModel.CurrentPlan != null, _viewModel.StatusMessage);
 
             // 如果是「主入口」打开且没有现存计划，自动开始生成
             if (_autoGenerate && _viewModel.CurrentPlan == null && !_viewModel.IsGeneratingOutline)
             {
                 Log.Information("[WeeklyPlanWindow] autoGenerate=true，自动触发 GenerateOutlineAsync");
-                await _viewModel.GenerateOutlineCommand.ExecuteAsync(null);
+                try
+                {
+                    // 生成期间鼠标显示等待光标，让用户知道正在工作
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    await _viewModel.GenerateOutlineCommand.ExecuteAsync(null);
+                }
+                catch (Exception cmdEx)
+                {
+                    Log.Error(cmdEx, "[WeeklyPlanWindow] ExecuteAsync 捕获到异常");
+                    MessageBox.Show(
+                        $"生成四周大纲时发生错误：\n\n{cmdEx.Message}",
+                        "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    Mouse.OverrideCursor = null;
+                }
             }
         }
         catch (Exception ex)

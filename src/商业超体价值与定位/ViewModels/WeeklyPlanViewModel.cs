@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -226,12 +227,16 @@ public partial class WeeklyPlanViewModel : ObservableObject
     [RelayCommand]
     private async Task GenerateOutlineAsync()
     {
+        Log.Information("[GenerateOutlineAsync] 进入方法，IsGeneratingOutline={IsGenerating}",
+            IsGeneratingOutline);
         if (IsGeneratingOutline) return;
 
         var session = _sessionService.CurrentSession;
 
         // 检查是否有蓝图内容
         var blueprintText = _weeklyPlanService.GetBlueprintText(session);
+        Log.Information("[GenerateOutlineAsync] blueprintText 长度: {Len}",
+            blueprintText?.Length ?? 0);
         if (string.IsNullOrWhiteSpace(blueprintText))
         {
             StatusMessage = "请先生成商业蓝图，再生成周计划";
@@ -247,8 +252,13 @@ public partial class WeeklyPlanViewModel : ObservableObject
         {
             IsGeneratingOutline = true;
             StatusMessage = "正在生成四周执行大纲（基于商业蓝图）...";
+            Log.Information("[GenerateOutlineAsync] 已设置 IsGeneratingOutline=true，开始调用 LLM");
+            // 鼠标显示等待光标
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
             var plan = await _weeklyPlanService.GenerateWeeklyOutlineAsync(session);
+            Log.Information("[GenerateOutlineAsync] LLM 返回 plan.Weeks.Count={Count}",
+                plan?.Weeks.Count ?? 0);
             CurrentPlan = plan;
             session.WeeklyPlan = plan;
 
@@ -271,10 +281,18 @@ public partial class WeeklyPlanViewModel : ObservableObject
         {
             StatusMessage = $"生成失败：{ex.Message}";
             Log.Error(ex, "[GenerateOutlineAsync] 异常");
+            // 任何失败都弹窗，让用户知道发生了什么
+            MessageBox.Show(
+                $"生成四周大纲时发生错误：\n\n{ex.Message}\n\n请检查网络、API Key 配置，或稍后重试。",
+                "生成失败",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
         finally
         {
             IsGeneratingOutline = false;
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+            Log.Information("[GenerateOutlineAsync] 已设置 IsGeneratingOutline=false（finally）");
         }
     }
 
