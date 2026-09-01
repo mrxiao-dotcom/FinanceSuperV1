@@ -117,6 +117,24 @@ public partial class MainWindow : Window
         settingsWindow.ShowDialog();
     }
 
+    private void OpenPrompts_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var promptsWindow = new PromptsWindow
+            {
+                Owner = this
+            };
+            promptsWindow.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "[OpenPrompts_Click] 打开提示词配置窗口失败");
+            MessageBox.Show($"无法打开提示词配置窗口：\n{ex.Message}",
+                "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void About_Click(object sender, RoutedEventArgs e)
     {
         MessageBox.Show(

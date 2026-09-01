@@ -32,6 +32,7 @@
             </MenuItem>
             <MenuItem Header="设置" Foreground="White">
                 <MenuItem Header="LLM API 配置..." Click="OpenSettings_Click"/>
+                <MenuItem Header="提示词配置..." Click="OpenPrompts_Click"/>
             </MenuItem>
             <MenuItem Header="帮助" Foreground="White">
                 <MenuItem Header="关于商业超体" Click="About_Click"/>

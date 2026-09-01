@@ -77,6 +77,7 @@ public partial class App : Application
         services.AddSingleton<ILlmService, LlmService>();
         services.AddSingleton<IContentExtractorService, ContentExtractorService>();
         services.AddSingleton<IExportService, ExportService>();
+        services.AddSingleton<IPromptsService, PromptsService>();
         services.AddSingleton<IWeeklyPlanService, WeeklyPlanService>();
 
         // 注册视图模型
@@ -85,6 +86,7 @@ public partial class App : Application
         services.AddTransient<BusinessCanvasViewModel>();
         services.AddTransient<SessionListViewModel>();
         services.AddTransient<WeeklyPlanViewModel>();
+        services.AddTransient<PromptsViewModel>();
     }
 
     protected override void OnExit(ExitEventArgs e)

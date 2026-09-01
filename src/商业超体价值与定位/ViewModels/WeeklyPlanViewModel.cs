@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -61,6 +62,18 @@ public partial class WeeklyPlanViewModel : ObservableObject
     [ObservableProperty]
     private DailyTask? _selectedTask;
 
+    /// <summary>四周执行大纲的总览文本（Markdown），生成大纲后即可看到。</summary>
+    [ObservableProperty]
+    private string _outlineOverview = "";
+
+    /// <summary>是否展示「大纲总览」视图（与「选中周任务视图」互斥）。</summary>
+    [ObservableProperty]
+    private bool _isViewingOverview;
+
+    /// <summary>是否展示「选中周任务」视图（默认 false，刚生成大纲时为 true，展开成总览）。</summary>
+    [ObservableProperty]
+    private bool _isViewingWeek;
+
     public WeeklyPlanViewModel(
         IWeeklyPlanService weeklyPlanService,
         ISessionService sessionService)
@@ -104,11 +117,56 @@ public partial class WeeklyPlanViewModel : ObservableObject
         }
         HasPlan = true;
 
-        // 默认选中第一周
-        if (Weeks.Count > 0)
+        // 重新构造大纲总览
+        OutlineOverview = BuildOutlineOverview(CurrentPlan);
+
+        // 默认显示大纲总览，让用户一眼看到 4 周全局
+        IsViewingOverview = true;
+        IsViewingWeek = false;
+
+        // 默认选中第一周（任务视图切换用）
+        if (Weeks.Count > 0 && SelectedWeek == null)
         {
             SelectedWeek = Weeks[0];
         }
+    }
+
+    /// <summary>把 4 周大纲拼成一段 Markdown 总览文本。</summary>
+    private static string BuildOutlineOverview(WeeklyPlan plan)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("## 📋 四周执行大纲总览");
+        sb.AppendLine();
+        sb.AppendLine($"> 生成时间：{plan.GeneratedAt:yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"> 周数：{plan.Weeks.Count}");
+        sb.AppendLine();
+        sb.AppendLine("---");
+        sb.AppendLine();
+
+        foreach (var w in plan.Weeks.OrderBy(w => w.WeekNumber))
+        {
+            sb.AppendLine($"### 第 {w.WeekNumber} 周：{w.Title}");
+            sb.AppendLine();
+
+            if (string.IsNullOrWhiteSpace(w.Outline))
+            {
+                sb.AppendLine("（暂无大纲）");
+            }
+            else
+            {
+                sb.AppendLine(w.Outline);
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($"**任务状态**: {(w.HasTasks ? $"✅ 已生成 {w.DailyTasks.Count} 条任务" : "⏳ 待生成日常任务")}");
+            sb.AppendLine();
+            sb.AppendLine("---");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("> 💡 点击左侧「周次」可查看某一周的日常任务详情。");
+        return sb.ToString();
     }
 
     partial void OnSelectedWeekChanged(WeekPlan? value)
@@ -136,6 +194,32 @@ public partial class WeeklyPlanViewModel : ObservableObject
         StatusMessage = HasTasks
             ? $"第 {value.WeekNumber} 周任务已生成，共 {value.DailyTasks.Count} 项"
             : $"第 {value.WeekNumber} 周大纲已就绪，请生成日常任务";
+
+        // 选中某周 → 自动切到周详情视图
+        IsViewingWeek = true;
+        IsViewingOverview = false;
+    }
+
+    /// <summary>切换到"大纲总览"视图。</summary>
+    [RelayCommand]
+    private void ViewOverview()
+    {
+        IsViewingOverview = true;
+        IsViewingWeek = false;
+        StatusMessage = "正在查看四周执行大纲总览";
+    }
+
+    /// <summary>切换到"选中周任务详情"视图。</summary>
+    [RelayCommand]
+    private void ViewSelectedWeek()
+    {
+        if (SelectedWeek == null)
+        {
+            StatusMessage = "请先在左侧选择一周";
+            return;
+        }
+        IsViewingWeek = true;
+        IsViewingOverview = false;
     }
 
     /// <summary>生成四周执行大纲。</summary>
@@ -162,7 +246,7 @@ public partial class WeeklyPlanViewModel : ObservableObject
         try
         {
             IsGeneratingOutline = true;
-            StatusMessage = "正在生成四周执行大纲...";
+            StatusMessage = "正在生成四周执行大纲（基于商业蓝图）...";
 
             var plan = await _weeklyPlanService.GenerateWeeklyOutlineAsync(session);
             CurrentPlan = plan;
@@ -172,7 +256,7 @@ public partial class WeeklyPlanViewModel : ObservableObject
             _sessionService.AutoSave();
 
             PlanInfo = $"生成于 {plan.GeneratedAt:yyyy-MM-dd HH:mm}";
-            StatusMessage = $"四周大纲生成完成！请选择某一周生成日常任务。";
+            StatusMessage = $"✓ 四周大纲生成完成！下方可见全部 4 周执行大纲总览。";
 
             Log.Information("[GenerateOutlineAsync] 周计划生成成功，周数={Count}",
                 plan.Weeks.Count);
@@ -225,9 +309,11 @@ public partial class WeeklyPlanViewModel : ObservableObject
             }
 
             HasTasks = true;
+            // 任务生成后，刷新总览
+            OutlineOverview = BuildOutlineOverview(CurrentPlan);
             _sessionService.AutoSave();
 
-            StatusMessage = $"第 {SelectedWeek.WeekNumber} 周任务生成完成，共 {week.DailyTasks.Count} 项";
+            StatusMessage = $"✓ 第 {SelectedWeek.WeekNumber} 周任务生成完成，共 {week.DailyTasks.Count} 项";
 
             Log.Information("[GenerateTasksAsync] 第 {Week} 周任务生成完成，任务数={Count}",
                 SelectedWeek.WeekNumber, week.DailyTasks.Count);
@@ -482,5 +568,26 @@ public partial class WeeklyPlanViewModel : ObservableObject
         CurrentWeekTasks.Clear();
 
         await GenerateTasksAsync();
+    }
+
+    /// <summary>复制整个大纲总览到剪贴板（方便贴到 Notion / 飞书等）。</summary>
+    [RelayCommand]
+    private void CopyOutlineOverview()
+    {
+        if (string.IsNullOrEmpty(OutlineOverview))
+        {
+            StatusMessage = "暂无可复制的总览";
+            return;
+        }
+        try
+        {
+            Clipboard.SetText(OutlineOverview);
+            StatusMessage = "四周大纲总览已复制到剪贴板";
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "复制大纲总览失败");
+            StatusMessage = "复制失败，请重试";
+        }
     }
 }

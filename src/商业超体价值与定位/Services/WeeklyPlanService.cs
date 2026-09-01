@@ -33,6 +33,7 @@ public interface IWeeklyPlanService
 public class WeeklyPlanService : IWeeklyPlanService
 {
     private readonly ILlmService _llmService;
+    private readonly IPromptsService _promptsService;
     private readonly JsonSerializerSettings _jsonSettings;
     private readonly string _sessionsFolder;
 
@@ -42,9 +43,10 @@ public class WeeklyPlanService : IWeeklyPlanService
     private const string WeeklyPlanPromptNotLoaded =
         "提示词未加载，请在调用前先调用 LoadPromptsAsync()";
 
-    public WeeklyPlanService(ILlmService llmService)
+    public WeeklyPlanService(ILlmService llmService, IPromptsService promptsService)
     {
         _llmService = llmService;
+        _promptsService = promptsService;
         _jsonSettings = new JsonSerializerSettings
         {
             ContractResolver = new DefaultContractResolver
@@ -57,51 +59,34 @@ public class WeeklyPlanService : IWeeklyPlanService
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "商业超体");
         _sessionsFolder = Path.Combine(appDataPath, "sessions");
+
+        // 订阅 prompt 变更：用户在「提示词配置」窗口保存后立即生效
+        _promptsService.PromptsChanged += OnPromptsChanged;
+    }
+
+    private void OnPromptsChanged(object? sender, EventArgs e)
+    {
+        // 从 PromptsService 重新拉取最新值（避免重复读盘）
+        ReloadFromService();
+        Log.Information("[WeeklyPlanService] 收到 PromptsChanged 事件，已更新本地 prompt 缓存");
+    }
+
+    private void ReloadFromService()
+    {
+        _weeklyPlanPromptTemplate = _promptsService.Get("WeeklyPlanPrompt") ?? string.Empty;
+        _dailyTasksPromptTemplate = _promptsService.Get("DailyTasksPrompt") ?? string.Empty;
     }
 
     public async Task LoadPromptsAsync()
     {
-        try
-        {
-            var promptsPath = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "Resources",
-                "prompts.json");
+        // 直接从 PromptsService 拉取（PromptsService 启动时已自动加载）
+        ReloadFromService();
 
-            if (!File.Exists(promptsPath))
-            {
-                // 回退到 LocalApplicationData（开发阶段 prompts.json 可能放在这里）
-                promptsPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "商业超体",
-                    "prompts.json");
-            }
+        Log.Information("[WeeklyPlanService] prompts 已从 PromptsService 加载。WeeklyPlanPrompt={HasIt}, DailyTasksPrompt={HasIt2}",
+            !string.IsNullOrEmpty(_weeklyPlanPromptTemplate),
+            !string.IsNullOrEmpty(_dailyTasksPromptTemplate));
 
-            if (File.Exists(promptsPath))
-            {
-                var json = await File.ReadAllTextAsync(promptsPath);
-                var obj = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                if (obj != null)
-                {
-                    obj.TryGetValue("WeeklyPlanPrompt", out var weeklyPlanPrompt);
-                    obj.TryGetValue("DailyTasksPrompt", out var dailyTasksPrompt);
-                    _weeklyPlanPromptTemplate = weeklyPlanPrompt ?? string.Empty;
-                    _dailyTasksPromptTemplate = dailyTasksPrompt ?? string.Empty;
-                }
-
-                Log.Information("[WeeklyPlanService] prompts.json 加载完成。WeeklyPlanPrompt={HasIt}, DailyTasksPrompt={HasIt2}",
-                    !string.IsNullOrEmpty(_weeklyPlanPromptTemplate),
-                    !string.IsNullOrEmpty(_dailyTasksPromptTemplate));
-            }
-            else
-            {
-                Log.Warning("[WeeklyPlanService] prompts.json 未找到: {Path}", promptsPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "[WeeklyPlanService] 加载 prompts.json 失败");
-        }
+        await Task.CompletedTask;
     }
 
     public async Task<WeeklyPlan> GenerateWeeklyOutlineAsync(DiagnosticSession session, int totalWeeks = 4)
