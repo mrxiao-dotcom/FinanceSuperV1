@@ -73,8 +73,10 @@ public class WeeklyPlanService : IWeeklyPlanService
 
     private void ReloadFromService()
     {
-        _weeklyPlanPromptTemplate = _promptsService.Get("WeeklyPlanPrompt") ?? string.Empty;
-        _dailyTasksPromptTemplate = _promptsService.Get("DailyTasksPrompt") ?? string.Empty;
+        var wpp = _promptsService.Get("WeeklyPlanPrompt");
+        var dtp = _promptsService.Get("DailyTasksPrompt");
+        _weeklyPlanPromptTemplate  = string.IsNullOrWhiteSpace(wpp) ? string.Empty : wpp;
+        _dailyTasksPromptTemplate = string.IsNullOrWhiteSpace(dtp) ? string.Empty : dtp;
     }
 
     public async Task LoadPromptsAsync()

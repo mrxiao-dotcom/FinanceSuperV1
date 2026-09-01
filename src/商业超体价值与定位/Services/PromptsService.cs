@@ -137,7 +137,9 @@ public class PromptsService : IPromptsService
                 return v;
         }
         // 兜底：磁盘字典里没找到（或为空）时，从嵌入资源中取出厂默认值
-        return LoadDefaultFromEmbeddedResource(key);
+        var fallback = LoadDefaultFromEmbeddedResource(key);
+        // 若 fallback 也是空串，视为"无值"（返回 null 而非空串，防止调用方误用）
+        return string.IsNullOrEmpty(fallback) ? null : fallback;
     }
 
     /// <summary>
