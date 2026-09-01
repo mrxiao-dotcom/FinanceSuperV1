@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,8 +67,11 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // 注册HttpClient
-        services.AddHttpClient();
+        // 注册HttpClient（默认 100s 对长上下文生成不足，改为 10 分钟）
+        services.AddHttpClient<HttpClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(10);
+        });
 
         // 注册服务
         services.AddSingleton<ISessionService, SessionService>();

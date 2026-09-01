@@ -335,6 +335,13 @@ public partial class WeeklyPlanViewModel : ObservableObject
 
             Log.Information("[GenerateTasksAsync] 第 {Week} 周任务生成完成，任务数={Count}",
                 SelectedWeek.WeekNumber, week.DailyTasks.Count);
+
+            // 给用户一个明确反馈（状态栏小字容易被忽略）
+            MessageBox.Show(
+                $"第 {SelectedWeek.WeekNumber} 周已生成 {week.DailyTasks.Count} 条可执行的日常任务。\n\n下方任务卡片已可查看，可点击单条任务查看完整文案。",
+                "生成成功",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
         catch (LlmApiKeyNotConfiguredException)
         {
@@ -346,6 +353,12 @@ public partial class WeeklyPlanViewModel : ObservableObject
         {
             StatusMessage = $"生成失败：{ex.Message}";
             Log.Error(ex, "[GenerateTasksAsync] 异常");
+            // 失败也弹窗，避免用户在状态栏小字上看不到原因
+            MessageBox.Show(
+                $"生成日常任务时发生错误：\n\n{ex.Message}\n\n请检查网络、API Key 配置，或稍后重试。",
+                "生成失败",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
         finally
         {
