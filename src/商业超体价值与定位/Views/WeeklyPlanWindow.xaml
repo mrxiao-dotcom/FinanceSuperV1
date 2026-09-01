@@ -227,7 +227,7 @@
                             Style="{StaticResource PrimaryButton}"
                             Command="{Binding GenerateOutlineCommand}"
                             IsEnabled="{Binding IsGeneratingOutline, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
-                            Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Visible}"
+                            Visibility="{Binding HasPlan, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible}"
                             Margin="0,0,10,0"/>
                     <Button Content="重新生成四周大纲"
                             Style="{StaticResource SecondaryButton}"
@@ -259,7 +259,7 @@
 
         <!-- 无计划时的提示 -->
         <Border Grid.Row="2"
-                Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Collapsed}">
+                Visibility="{Binding HasPlan, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible}">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="📅" FontSize="64" HorizontalAlignment="Center" Opacity="0.5"/>
                 <TextBlock Text="尚未生成周计划"
@@ -574,7 +574,7 @@
 
                         <!-- 未生成任务时的提示 -->
                         <Border Background="#252A40" CornerRadius="8" Padding="30"
-                                Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Collapsed}">
+                                Visibility="{Binding HasTasks, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="📝" FontSize="36" HorizontalAlignment="Center" Opacity="0.5"/>
                                 <TextBlock Text="本周任务尚未生成"
