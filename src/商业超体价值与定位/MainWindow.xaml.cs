@@ -99,7 +99,9 @@ public partial class MainWindow : Window
     {
         try
         {
-            var weeklyPlanWindow = new WeeklyPlanWindow();
+            // autoGenerate=true：主入口的「生成四周大纲」按钮要一次点击 = 立即生成大纲，
+            // 而不是只打开窗口让用户再点一次。
+            var weeklyPlanWindow = new WeeklyPlanWindow(autoGenerate: true);
             weeklyPlanWindow.Owner = this;
             weeklyPlanWindow.Show();
         }
