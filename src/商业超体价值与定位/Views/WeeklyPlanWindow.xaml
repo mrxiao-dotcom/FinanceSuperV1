@@ -15,6 +15,7 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
         <conv:InverseBooleanConverter x:Key="InverseBoolConverter"/>
         <conv:NullToVisibilityConverter x:Key="NullToCollapsedConverter"/>
         <conv:ContentFormatToColorConverter x:Key="FormatToColorConverter"/>
@@ -461,12 +462,63 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <Grid>
+                        <!-- ========== 大幅 CTA：尚未生成四周大纲时 ========== -->
+                        <Border Background="#1A3A5C"
+                                CornerRadius="10"
+                                Padding="40,32"
+                                Margin="0,0,0,12"
+                                Visibility="{Binding HasPlan, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000" BlurRadius="20" ShadowDepth="2" Opacity="0.5"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="🗺️"
+                                           FontSize="48"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,12"/>
+                                <TextBlock Text="还没有生成四周执行大纲"
+                                           Foreground="White"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock Text="系统将基于您的商业蓝图，为您规划未来 4 周的执行地图。"
+                                           Foreground="#C0D8E8"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center"
+                                           MaxWidth="380"
+                                           TextWrapping="Wrap"
+                                           LineHeight="20"
+                                           Margin="0,0,0,20"/>
+                                <Button Content="🎯 生成四周大纲（点击此处开始）"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Command="{Binding GenerateOutlineCommand}"
+                                        IsEnabled="{Binding IsGeneratingOutline, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                                        Padding="28,14"
+                                        FontSize="14"
+                                        HorizontalAlignment="Center"/>
+                                <TextBlock Foreground="#8FA8BD"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,14,0,0"
+                                           TextAlignment="Center"
+                                           MaxWidth="420"
+                                           TextWrapping="Wrap"
+                                           LineHeight="18">
+                                    <Run Text="前置条件：需要先完成诊断对话并生成商业蓝图。"/>
+                                    <LineBreak/>
+                                    <Run Text="若蓝图未生成，点击按钮后会提示先去生成。"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
                         <!-- ========== 视图 A：四周执行大纲总览 ========== -->
                     <Border Background="#252A40"
                             CornerRadius="8"
                             Padding="20"
                             Margin="0,0,0,12"
-                            Visibility="{Binding IsViewingOverview, Converter={StaticResource BoolToVis}, FallbackValue=Visible}">
+                            Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, FallbackValue=Visible}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <TextBlock Text="🗺️ 四周执行大纲总览"

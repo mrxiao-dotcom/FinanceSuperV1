@@ -39,6 +39,45 @@
             </MenuItem>
         </Menu>
 
+        <!-- 快捷入口栏 -->
+        <Border DockPanel.Dock="Top" Background="#0F3460" Padding="14,8" BorderBrush="#16213E" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="快捷入口："
+                           Foreground="#A0A0A0"
+                           FontSize="12"
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <Button Content="🗺️  生成四周大纲"
+                        Click="OpenWeeklyPlan_Click"
+                        Background="#E94560"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Padding="16,7"
+                        FontSize="13"
+                        Cursor="Hand"
+                        Margin="0,0,8,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="5"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#D63855"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <TextBlock Text="→ 基于商业蓝图，规划未来 4 周的执行地图"
+                           Foreground="#C0D0E0"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
         <!-- 主内容区 -->
         <Grid>
             <Grid.ColumnDefinitions>
