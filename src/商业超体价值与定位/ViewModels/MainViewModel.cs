@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using 商业超体价值与定位.Models;
 using 商业超体价值与定位.Services;
+using Serilog;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -97,19 +98,46 @@ public partial class MainViewModel : ObservableObject
     private async Task ProcessConversationAsync()
     {
         StatusMessage = "正在提炼关键信息...";
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var extractor = App.ServiceProvider.GetRequiredService<IContentExtractorService>();
         var session = App.ServiceProvider.GetRequiredService<ISessionService>().CurrentSession;
+        var sessionId = App.ServiceProvider.GetRequiredService<ISessionService>().CurrentSessionId;
 
-        await extractor.ExtractAndUpdateAsync(ChatViewModel.Messages, session);
-        await BusinessCanvasViewModel.UpdateFromSessionAsync(session);
+        Log.Information("ProcessConversationAsync 开始: SessionId={Id}, 消息数={Count}",
+            sessionId, ChatViewModel.Messages.Count);
 
-        // 自动保存会话
-        App.ServiceProvider.GetRequiredService<ISessionService>().AutoSave();
+        try
+        {
+            await extractor.ExtractAndUpdateAsync(ChatViewModel.Messages, session);
+            await BusinessCanvasViewModel.UpdateFromSessionAsync(session);
 
-        // 刷新会话列表
-        SessionListViewModel.LoadSessions();
+            // 自动保存会话
+            App.ServiceProvider.GetRequiredService<ISessionService>().AutoSave();
 
-        StatusMessage = "商业画布已更新";
+            // 刷新会话列表
+            SessionListViewModel.LoadSessions();
+
+            StatusMessage = "商业画布已更新";
+            Log.Information("ProcessConversationAsync 完成, 耗时 {Ms}ms, 新完成度={Pct:P0}",
+                stopwatch.ElapsedMilliseconds, BusinessCanvasViewModel.CompletionPercentage);
+        }
+        catch (LlmApiKeyNotConfiguredException)
+        {
+            Log.Warning("提炼失败：API Key 未配置");
+            StatusMessage = "请先在设置中配置 API Key";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "提炼关键信息时发生错误: SessionId={Id}", sessionId);
+            try { RuntimeDiagnostics.WriteCrashLog(ex, "MainViewModel.ProcessConversationAsync",
+                extra: $"SessionId={sessionId}, Messages={ChatViewModel.Messages.Count}"); }
+            catch { }
+            StatusMessage = $"提炼失败: {ex.Message}";
+        }
+        finally
+        {
+            stopwatch.Stop();
+        }
     }
 
     private async void OnSessionSwitched(object? sender, string sessionId)
@@ -121,10 +149,13 @@ public partial class MainViewModel : ObservableObject
     {
         IsBusy = true;
         StatusMessage = "正在切换会话...";
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         try
         {
             var sessionService = App.ServiceProvider.GetRequiredService<ISessionService>();
+            Log.Information("SwitchToSessionAsync 开始: From={From}, To={To}",
+                sessionService.CurrentSessionId, sessionId);
 
             // 保存当前会话
             sessionService.AutoSave();
@@ -150,14 +181,21 @@ public partial class MainViewModel : ObservableObject
             SessionListViewModel.NotifySessionSwitched(sessionId);
 
             StatusMessage = "会话已切换";
+            Log.Information("SwitchToSessionAsync 完成: To={To}, Messages={Count}, 耗时={Ms}ms",
+                sessionId, session.Messages.Count, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "切换会话失败: Target={Target}", sessionId);
+            try { RuntimeDiagnostics.WriteCrashLog(ex, "MainViewModel.SwitchToSessionAsync",
+                extra: $"Target={sessionId}"); }
+            catch { }
             StatusMessage = $"切换会话失败: {ex.Message}";
         }
         finally
         {
             IsBusy = false;
+            stopwatch.Stop();
         }
     }
 

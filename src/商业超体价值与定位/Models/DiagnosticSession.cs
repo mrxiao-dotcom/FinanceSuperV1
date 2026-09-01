@@ -11,6 +11,7 @@ public class DiagnosticSession
     public DiagnosticStage CurrentStage { get; set; } = DiagnosticStage.NotStarted;
     public List<ExtractedTag> ExtractedTags { get; set; } = new();
     public CompetitiveAnalysis? CompetitiveAnalysis { get; set; }
+    public WeeklyPlan? WeeklyPlan { get; set; }
 }
 
 public enum DiagnosticStage

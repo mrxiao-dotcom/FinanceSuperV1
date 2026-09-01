@@ -171,3 +171,34 @@ public class StringToVisibilityConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// ContentFormat 枚举值 → 对应的徽章背景色（十六进制字符串）。
+/// </summary>
+public class ContentFormatToColorConverter : IValueConverter
+{
+    private static readonly Dictionary<商业超体价值与定位.Models.ContentFormat, string> FormatColors = new()
+    {
+        { 商业超体价值与定位.Models.ContentFormat.Article,       "#2196F3" },  // 蓝色
+        { 商业超体价值与定位.Models.ContentFormat.ShortVideoScript, "#E91E63" }, // 粉色
+        { 商业超体价值与定位.Models.ContentFormat.ImagePost,    "#FF9800" },  // 橙色
+        { 商业超体价值与定位.Models.ContentFormat.PosterCopy,   "#9C27B0" },  // 紫色
+        { 商业超体价值与定位.Models.ContentFormat.PrivateMessage, "#4CAF50" }, // 绿色
+        { 商业超体价值与定位.Models.ContentFormat.Generic,      "#607D8B" },  // 灰蓝
+    };
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is 商业超体价值与定位.Models.ContentFormat format &&
+            FormatColors.TryGetValue(format, out var hex))
+        {
+            return hex;
+        }
+        return "#3A3F5C"; // 默认色
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

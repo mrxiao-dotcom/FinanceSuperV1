@@ -1,0 +1,593 @@
+<Window x:Class="商业超体价值与定位.Views.WeeklyPlanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:商业超体价值与定位.ViewModels"
+        xmlns:conv="clr-namespace:商业超体价值与定位.Converters"
+        mc:Ignorable="d"
+        Title="周执行计划"
+        Height="780" Width="1100"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#1A1A2E"
+        d:DataContext="{d:DesignInstance Type=vm:WeeklyPlanViewModel}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolConverter"/>
+        <conv:NullToVisibilityConverter x:Key="NullToCollapsedConverter"/>
+        <conv:ContentFormatToColorConverter x:Key="FormatToColorConverter"/>
+
+        <!-- 格式徽章颜色 -->
+        <Style x:Key="FormatBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+        </Style>
+
+        <!-- 操作按钮样式 -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#E94560"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#D63855"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#5A3A4A"/>
+                                <Setter Property="Foreground" Value="#808080"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#16213E"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="BorderBrush" Value="#3A3F5C"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#252A40"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#1A1A2E"/>
+                                <Setter Property="Foreground" Value="#606060"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CopyButton" TargetType="Button">
+            <Setter Property="Background" Value="#2A3A5C"/>
+            <Setter Property="Foreground" Value="#8AB4F8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3A4A6C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 任务卡片样式 -->
+        <Style x:Key="TaskCard" TargetType="Border">
+            <Setter Property="Background" Value="#16213E"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <!-- ListBoxItem -->
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#C0C0C0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="#2A3040"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#2A3040"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1F2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部标题栏 -->
+        <Border Grid.Row="0" Background="#16213E" Padding="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="📋 周执行计划"
+                               Foreground="White"
+                               FontSize="20"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding PlanInfo}"
+                               Foreground="#808080"
+                               FontSize="12"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="生成四周大纲"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding GenerateOutlineCommand}"
+                            IsEnabled="{Binding IsGeneratingOutline, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                            Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Visible}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="重新生成四周大纲"
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding GenerateOutlineCommand}"
+                            IsEnabled="{Binding IsGeneratingOutline, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                            Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="导出完整计划"
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ExportFullPlanToMarkdownCommand}"
+                            Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 生成中状态条 -->
+        <Border Grid.Row="1"
+                Background="#1F2535"
+                Padding="16,8"
+                Visibility="{Binding IsGeneratingOutline, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="⏳" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding StatusMessage, FallbackValue='正在生成...，请稍候'}"
+                           Foreground="#E0E0E0"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 无计划时的提示 -->
+        <Border Grid.Row="2"
+                Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Collapsed}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="📅" FontSize="64" HorizontalAlignment="Center" Opacity="0.5"/>
+                <TextBlock Text="尚未生成周计划"
+                           Foreground="#808080"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,8"/>
+                <TextBlock Text="点击上方「生成四周大纲」按钮，"
+                           Foreground="#606060"
+                           FontSize="13"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="系统将基于您的商业蓝图生成未来一个月的执行计划。"
+                           Foreground="#606060"
+                           FontSize="13"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+                <Button Content="开始生成"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding GenerateOutlineCommand}"
+                        HorizontalAlignment="Center"
+                        Padding="24,10"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 主内容区：左侧周导航 + 右侧内容 -->
+        <Grid Grid.Row="2"
+              Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ========== 左侧：四周导航 ========== -->
+            <Border Grid.Column="0" Background="#16213E" Padding="12">
+                <StackPanel>
+                    <TextBlock Text="执行周次"
+                               Foreground="#808080"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Margin="8,0,0,10"/>
+
+                    <ListBox ItemsSource="{Binding Weeks}"
+                             SelectedItem="{Binding SelectedWeek}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 周序号圆圈 -->
+                                    <Border Grid.Column="0"
+                                            Width="28" Height="28"
+                                            CornerRadius="14"
+                                            Background="#E94560"
+                                            Margin="0,0,10,0"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding WeekNumber, StringFormat='W{0}'}"
+                                                   Foreground="White"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}"
+                                                   Foreground="White"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Foreground="#606060" FontSize="10" Margin="0,2,0,0">
+                                            <Run Text="{Binding DailyTasks.Count, StringFormat='{}{0} 个任务'}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!-- 完成标记 -->
+                                    <TextBlock Grid.Column="2"
+                                               Text="✅"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- 底部导出按钮 -->
+                    <Button Content="导出完整计划"
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ExportFullPlanToMarkdownCommand}"
+                            Margin="0,20,0,0"
+                            HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 分隔条 -->
+            <GridSplitter Grid.Column="1"
+                          Width="3"
+                          Background="#16213E"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"/>
+
+            <!-- ========== 右侧：选中周的内容 ========== -->
+            <Grid Grid.Column="2" Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 周标题 + 操作按钮 -->
+                <Border Grid.Row="0" Background="#252A40" CornerRadius="8" Padding="16,12" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SelectedWeekTitle, FallbackValue='请选择一周'}"
+                                       Foreground="White"
+                                       FontSize="16"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding StatusMessage, FallbackValue='请选择一周'}"
+                                       Foreground="#808080"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="生成日常任务"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding GenerateTasksCommand}"
+                                    IsEnabled="{Binding IsGeneratingTasks, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                                    Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Visible}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="重新生成"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding RegenerateTasksCommand}"
+                                    IsEnabled="{Binding IsGeneratingTasks, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                                    Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="导出本周"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding ExportCurrentWeekToMarkdownCommand}"
+                                    Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 生成任务中的加载指示 -->
+                <Border Grid.Row="1"
+                        Background="#1F2535"
+                        CornerRadius="6"
+                        Padding="12,8"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding IsGeneratingTasks, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏳ 正在生成日常任务，请稍候..."
+                                   Foreground="#C0C0C0"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 任务列表 -->
+                <ScrollViewer Grid.Row="2"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Visibility="{Binding HasPlan, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+
+                        <!-- 周大纲摘要（只读） -->
+                        <Border Background="#252A40" CornerRadius="6" Padding="14" Margin="0,0,0,12"
+                                Visibility="{Binding HasOutline, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                            <StackPanel>
+                                <TextBlock Text="📌 本周执行大纲"
+                                           Foreground="#4CAF50"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding SelectedWeekOutline}"
+                                           Foreground="#D0D0D0"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           LineHeight="20"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 未生成任务时的提示 -->
+                        <Border Background="#252A40" CornerRadius="8" Padding="30"
+                                Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, ConverterParameter=Inverse, FallbackValue=Collapsed}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📝" FontSize="36" HorizontalAlignment="Center" Opacity="0.5"/>
+                                <TextBlock Text="本周任务尚未生成"
+                                           Foreground="#808080"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,10,0,6"/>
+                                <TextBlock Text="点击上方「生成日常任务」按钮，"
+                                           Foreground="#606060"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="系统将基于大纲生成本周可执行的文案任务。"
+                                           Foreground="#606060"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,16"/>
+                                <Button Content="生成日常任务"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Command="{Binding GenerateTasksCommand}"
+                                        IsEnabled="{Binding IsGeneratingTasks, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
+                                        HorizontalAlignment="Center"
+                                        Padding="20,8"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 任务卡片列表 -->
+                        <ItemsControl ItemsSource="{Binding CurrentWeekTasks}"
+                                      Visibility="{Binding HasTasks, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource TaskCard}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- 第1行：序号 + 标题 + 格式徽章 -->
+                                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding Index, StringFormat='#{0}'}"
+                                                           Foreground="#E94560"
+                                                           FontSize="13"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,8,0"/>
+
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Title}"
+                                                           Foreground="White"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"
+                                                           TextWrapping="Wrap"/>
+
+                                                <!-- 格式徽章 -->
+                                                <Border Grid.Column="2"
+                                                        Style="{StaticResource FormatBadge}"
+                                                        Background="{Binding Format, Converter={StaticResource FormatToColorConverter}, FallbackValue=#3A3F5C}">
+                                                    <TextBlock Text="{Binding Format}"
+                                                               Foreground="White"
+                                                               FontSize="10"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- 第2行：策略 + 渠道 + 人群 -->
+                                            <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+                                                <TextBlock Foreground="#9E9E9E" FontSize="11" Margin="0,0,16,4">
+                                                    <Run Text="🎯 "/><Run Text="{Binding Strategy, TargetNullValue='—'}"/>
+                                                </TextBlock>
+                                                <TextBlock Foreground="#9E9E9E" FontSize="11" Margin="0,0,16,4">
+                                                    <Run Text="📣 "/><Run Text="{Binding Channel, TargetNullValue='—'}"/>
+                                                </TextBlock>
+                                                <TextBlock Foreground="#9E9E9E" FontSize="11" Margin="0,0,0,4">
+                                                    <Run Text="👤 "/><Run Text="{Binding Audience, TargetNullValue='—'}"/>
+                                                </TextBlock>
+                                            </WrapPanel>
+
+                                            <!-- 第3行：核心钩子 -->
+                                            <Border Grid.Row="2"
+                                                    Background="#1F2535"
+                                                    CornerRadius="6"
+                                                    Padding="12,10"
+                                                    Margin="0,0,0,10"
+                                                    Visibility="{Binding Hook, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Visible}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="🔥 核心钩子"
+                                                                   Foreground="#FF9800"
+                                                                   FontSize="11"
+                                                                   FontWeight="SemiBold"
+                                                                   Margin="0,0,0,4"/>
+                                                        <TextBlock Text="{Binding Hook}"
+                                                                   Foreground="#F0F0F0"
+                                                                   FontSize="12"
+                                                                   TextWrapping="Wrap"
+                                                                   LineHeight="18"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1"
+                                                            Content="复制"
+                                                            Style="{StaticResource CopyButton}"
+                                                            VerticalAlignment="Top"
+                                                            Margin="10,0,0,0"
+                                                            Command="{Binding DataContext.CopyTaskHookCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- 第4行：正文文案 -->
+                                            <StackPanel Grid.Row="3" Margin="0,0,0,10"
+                                                        Visibility="{Binding Copywriting, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Visible}">
+                                                <Grid Margin="0,0,0,6">
+                                                    <TextBlock Text="📄 文案正文"
+                                                               Foreground="#4CAF50"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"/>
+                                                    <Button Content="复制全部文案"
+                                                            Style="{StaticResource CopyButton}"
+                                                            HorizontalAlignment="Right"
+                                                            Command="{Binding DataContext.CopyTaskCopywritingCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                                </Grid>
+                                                <Border Background="#1F2535" CornerRadius="6" Padding="12,10">
+                                                    <TextBlock Text="{Binding Copywriting}"
+                                                               Foreground="#D0D0D0"
+                                                               FontSize="12"
+                                                               TextWrapping="Wrap"
+                                                               LineHeight="20"/>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <!-- 第5行：备注 -->
+                                            <StackPanel Grid.Row="4" Margin="0,0,0,0"
+                                                        Visibility="{Binding Notes, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Collapsed}">
+                                                <TextBlock Text="💡 备注"
+                                                           Foreground="#808080"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,4"/>
+                                                <TextBlock Text="{Binding Notes}"
+                                                           Foreground="#909090"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"
+                                                           LineHeight="17"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- 任务列表底部间距 -->
+                        <Border Height="20"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

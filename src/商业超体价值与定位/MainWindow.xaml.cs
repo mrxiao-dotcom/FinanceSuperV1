@@ -95,6 +95,22 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OpenWeeklyPlan_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var weeklyPlanWindow = new WeeklyPlanWindow();
+            weeklyPlanWindow.Owner = this;
+            weeklyPlanWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "[OpenWeeklyPlan_Click] 打开周计划窗口失败");
+            MessageBox.Show($"无法打开周计划窗口：\n{ex.Message}",
+                "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
     {
         var settingsWindow = new SettingsWindow();

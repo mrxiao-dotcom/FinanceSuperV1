@@ -26,6 +26,8 @@
                 <Separator/>
                 <MenuItem Header="导出商业蓝图..." Click="ExportBlueprint_Click"/>
                 <Separator/>
+                <MenuItem Header="周执行计划..." Click="OpenWeeklyPlan_Click"/>
+                <Separator/>
                 <MenuItem Header="退出" Click="Exit_Click"/>
             </MenuItem>
             <MenuItem Header="设置" Foreground="White">

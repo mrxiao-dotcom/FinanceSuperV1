@@ -38,9 +38,27 @@ public class SessionInfo
 public class SessionService : ISessionService
 {
     private readonly string _sessionsFolder;
+    private readonly IWeeklyPlanService? _weeklyPlanService;
     private DiagnosticSession _currentSession;
     private readonly List<SessionInfo> _sessionHistory = new();
     private readonly object _historyLock = new();
+
+    public SessionService(IWeeklyPlanService? weeklyPlanService = null)
+    {
+        _weeklyPlanService = weeklyPlanService;
+        var appDataPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "商业超体");
+        Directory.CreateDirectory(appDataPath);
+        _sessionsFolder = Path.Combine(appDataPath, "sessions");
+        Directory.CreateDirectory(_sessionsFolder);
+
+        // 迁移旧格式
+        MigrateOldFormat();
+
+        _currentSession = new DiagnosticSession();
+        LoadSessionHistory();
+    }
 
     public DiagnosticSession CurrentSession => _currentSession;
     public IReadOnlyList<SessionInfo> SessionHistory
@@ -223,6 +241,10 @@ public class SessionService : ISessionService
                 _currentSession = JsonConvert.DeserializeObject<DiagnosticSession>(json)
                     ?? new DiagnosticSession();
                 CurrentSessionId = sessionId;
+
+                // 加载周计划（如果存在）
+                LoadWeeklyPlanIfExists();
+
                 Log.Information("会话已恢复: {SessionId}", sessionId);
             }
             else
@@ -267,6 +289,9 @@ public class SessionService : ISessionService
 
             // 导出商业画布为 Markdown
             ExportCanvasToMarkdown(_currentSession, CurrentSessionId);
+
+            // 导出周计划为 Markdown + JSON
+            SaveWeeklyPlanIfExists();
 
             // 更新内存中的会话信息
             UpdateSessionHistoryInfo();
@@ -493,6 +518,40 @@ public class SessionService : ISessionService
         catch (Exception ex)
         {
             Log.Warning(ex, "导出商业画布失败");
+        }
+    }
+
+    /// <summary>如果当前会话有周计划，委托 WeeklyPlanService 保存（JSON + Markdown）。</summary>
+    private void SaveWeeklyPlanIfExists()
+    {
+        if (_currentSession.WeeklyPlan == null) return;
+        try
+        {
+            _weeklyPlanService?.SaveWeeklyPlan(_currentSession);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "保存周计划失败");
+        }
+    }
+
+    /// <summary>从磁盘加载周计划并挂载到当前会话。</summary>
+    private void LoadWeeklyPlanIfExists()
+    {
+        if (string.IsNullOrEmpty(CurrentSessionId)) return;
+        try
+        {
+            var plan = _weeklyPlanService?.LoadWeeklyPlan(CurrentSessionId);
+            if (plan != null)
+            {
+                _currentSession.WeeklyPlan = plan;
+                Log.Information("周计划已加载，SessionId={Id}, 周数={Weeks}",
+                    CurrentSessionId, plan.Weeks.Count);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "加载周计划失败");
         }
     }
 
