@@ -338,9 +338,8 @@
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Foreground="#606060" FontSize="10" Margin="0,2,0,0">
-                                            <Run Text="{Binding DailyTasks.Count, StringFormat='{}{0} 个任务'}"/>
-                                        </TextBlock>
+                                        <TextBlock Foreground="#606060" FontSize="10" Margin="0,2,0,0"
+                                                   Text="{Binding DailyTasks.Count, StringFormat='{}{0} 个任务', Mode=OneWay}"/>
                                     </StackPanel>
 
                                     <!-- 完成标记 -->
