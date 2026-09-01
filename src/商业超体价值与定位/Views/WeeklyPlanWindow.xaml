@@ -427,7 +427,7 @@
                                     Style="{StaticResource PrimaryButton}"
                                     Command="{Binding GenerateTasksCommand}"
                                     IsEnabled="{Binding IsGeneratingTasks, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
-                                    Visibility="{Binding IsViewingWeek, FallbackValue=Visible}"
+                                    Visibility="{Binding IsViewingWeek, Converter={StaticResource BoolToVis}, FallbackValue=Visible}"
                                     Margin="0,0,8,0"/>
                             <Button Content="重新生成"
                                     Style="{StaticResource SecondaryButton}"
