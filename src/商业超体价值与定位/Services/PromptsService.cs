@@ -133,8 +133,39 @@ public class PromptsService : IPromptsService
     {
         lock (_lock)
         {
-            return _prompts.TryGetValue(key, out var v) ? v : null;
+            if (_prompts.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+                return v;
         }
+        // 兜底：磁盘字典里没找到（或为空）时，从嵌入资源中取出厂默认值
+        return LoadDefaultFromEmbeddedResource(key);
+    }
+
+    /// <summary>
+    /// 从程序集嵌入资源 prompts.json 读取指定 key 的出厂默认值。
+    /// 用于兜底：磁盘上 prompts.json 是旧版本、缺新加的 key 时，仍能拿到正确的出厂 prompt。
+    /// </summary>
+    private static string? LoadDefaultFromEmbeddedResource(string key)
+    {
+        try
+        {
+            var assembly = typeof(PromptsService).Assembly;
+            var resourceName = "商业超体价值与定位.Resources.prompts.json";
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null) return null;
+            using var reader = new StreamReader(stream);
+            var json = reader.ReadToEnd();
+            var defaults = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            if (defaults != null && defaults.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v))
+            {
+                Log.Information("[PromptsService] 磁盘无值，从嵌入资源回退读取: {Key}", key);
+                return v;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "[PromptsService] 嵌入资源回退读取失败: {Key}", key);
+        }
+        return null;
     }
 
     public void Save(IDictionary<string, string> prompts)
