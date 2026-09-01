@@ -49,6 +49,8 @@
                            Margin="0,0,12,0"/>
                 <Button Content="🗺️  生成四周大纲"
                         Click="OpenWeeklyPlan_Click"
+                        IsEnabled="{Binding CanGenerateWeeklyPlan}"
+                        ToolTip="需要商业画布/蓝图完成度达到 100% 后才能生成四周大纲"
                         Background="#E94560"
                         Foreground="White"
                         BorderThickness="0"
@@ -66,6 +68,11 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="#D63855"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="#3A3F5C"/>
+                                    <Setter Property="Foreground" Value="#808080"/>
+                                    <Setter Property="Cursor" Value="No"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>

@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,17 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isHistoryPanelVisible = true;
 
+    /// <summary>
+    /// 商业画布/蓝图是否已完成诊断（进度达 100%）。
+    /// 用于门控「生成四周大纲」入口：进度未到 100% 时按钮置灰。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanGenerateWeeklyPlan))]
+    private bool _isBlueprintComplete;
+
+    /// <summary>对外暴露：是否允许生成周计划（即画布已完成 100%）。</summary>
+    public bool CanGenerateWeeklyPlan => IsBlueprintComplete;
+
     private readonly Timer _debounceTimer;
     private readonly object _lockObject = new();
     private bool _isProcessing;
@@ -56,6 +68,34 @@ public partial class MainViewModel : ObservableObject
 
         // 监听会话切换
         SessionListViewModel.SessionSwitched += OnSessionSwitched;
+
+        // 监听画布进度变化：100% 时点亮「生成四周大纲」
+        BusinessCanvasViewModel.PropertyChanged += OnCanvasPropertyChanged;
+        SyncBlueprintComplete();
+    }
+
+    private void OnCanvasPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BusinessCanvasViewModel.CompletionPercentage))
+        {
+            SyncBlueprintComplete();
+        }
+    }
+
+    private void SyncBlueprintComplete()
+    {
+        IsBlueprintComplete = BusinessCanvasViewModel.CompletionPercentage >= 1.0;
+    }
+
+    partial void OnBusinessCanvasViewModelChanged(BusinessCanvasViewModel value)
+    {
+        // 重新订阅画布的进度变化
+        if (value != null)
+        {
+            value.PropertyChanged -= OnCanvasPropertyChanged;
+            value.PropertyChanged += OnCanvasPropertyChanged;
+            SyncBlueprintComplete();
+        }
     }
 
     private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
